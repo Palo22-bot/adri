@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Adri💜</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --accent: #d30bee;
+            --accent-glow: rgba(189, 138, 0, 0.6);
+            --bg-dark: #0a0a0f;
+            --text-dim: rgba(255, 255, 255, 0.35);
+            --text-upcoming: rgba(255, 255, 255, 0.2);
+            --text-active: #0e0404;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: var(--bg-dark);
+            color: rgb(108, 207, 224);
+            overflow: hidden;
+            height: 100vh;
+            width: 100vw;
+        }
+
+        #bg-video {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            object-fit: cover;
+            z-index: 0;
+            filter: brightness(0.3) saturate(0.6);
+        }
+
+        .overlay {
+            position: fixed; inset: 0;
+            background: linear-gradient(180deg, rgba(0,0,0,0.5) 0%, rgba(10,5,15,0.65) 50%, rgba(0,0,0,0.8) 100%);
+            z-index: 1;
+        }
+
+        .particles {
+            position: fixed; inset: 0;
+            z-index: 2;
+            pointer-events: none;
+            overflow: hidden;
+        }
+        .particle {
+            position: absolute;
+            width: 2px;
+            background: linear-gradient(to bottom, transparent, var(--accent), transparent);
+            opacity: 0;
+            animation: rain linear infinite;
+        }
+        @keyframes rain {
+            0%   { transform: translateY(-100px); opacity: 0; }
+            10%  { opacity: 0.6; }
+            90%  { opacity: 0.3; }
+            100% { transform: translateY(110vh); opacity: 0; }
+        }
+
+        .main {
+            position: relative;
+            z-index: 3;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            padding-bottom: 140px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 28px;
+        }
+        .header h1 {
+            font-size: clamp(1.6rem, 5vw, 2.4rem);
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            text-shadow: 0 0 30px var(--accent-glow);
+        }
+        .header .subtitle {
+            color: var(--accent);
+            font-size: 0.82rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            margin-top: 6px;
+        }
+        .lyrics-container {
+            width: 100%;
+            max-width: 620px;
+            height: 340px;
+            position: relative;
+            overflow: hidden;
+            -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 18%, black 82%, transparent 100%);
+            mask-image:         linear-gradient(to bottom, transparent 0%, black 18%, black 82%, transparent 100%);
+        }
+
+        .lyrics-scroll {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 22px;
+            padding: 80px 20px;
+            will-change: transform;
+            transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+
+        .lyric-line {
+            font-size: clamp(1rem, 3.8vw, 1.3rem);
+            font-weight: 400;
+            text-align: center;
+            line-height: 1.5;
+            color: var(--text-dim);
+            transition: color 0.35s ease, transform 0.35s ease, filter 0.35s ease;
+            width: 100%;
+            padding: 2px 8px;
+        }
+
+        .lyric-line.past {
+            color: var(--text-dim);
+            transform: scale(0.93);
+            filter: blur(0.8px);
+        }
+
+        .lyric-line.active {
+            color: var(--text-active);
+            font-weight: 700;
+            font-size: clamp(1.18rem, 4.5vw, 1.5rem);
+            transform: scale(1.02);
+            filter: none;
+        }
+
+        .lyric-line.upcoming {
+            color: var(--text-upcoming);
+            transform: scale(0.93);
+        }
+        .lyric-line .word {
+            display: inline-block;
+            margin: 0 4px;
+            transition: color 0.15s ease, text-shadow 0.15s ease, transform 0.15s ease;
+        }
+        .lyric-line.active .word.lit {
+            color: #67f1a5;
+        }
+        .lyric-line.active .word.current-word {
+            color: var(--accent);
+            text-shadow: 0 0 18px var(--accent-glow);
+            transform: scale(1.08) translateY(-1px);
+        }
+        .lyric-line.past .word {
+            color: rgba(255,255,255,0.3);
+        }
+        .player {
+            position: fixed;
+            bottom: 0; left: 0; right: 0;
+            z-index: 10;
+            background: linear-gradient(to top, rgba(0,0,0,0.97) 60%, transparent);
+            padding: 18px 30px 28px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .progress-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            width: 100%;
+            max-width: 520px;
+            font-size: 0.72rem;
+            color: rgba(255,255,255,0.45);
+            font-weight: 600;
+            letter-spacing: 1px;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .bar {
+            flex: 1;
+            height: 4px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 4px;
+            overflow: visible;
+            cursor: pointer;
+            position: relative;
+            transition: height 0.2s;
+        }
+        .bar:hover { height: 6px; }
+
+        .progress-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, var(--accent), #00e6ad);
+            border-radius: 4px;
+            will-change: width;
+            position: relative;
+        }
+        .progress-fill::after {
+            content: '';
+            position: absolute;
+            right: -5px; top: 50%;
+            transform: translateY(-50%);
+            width: 11px; height: 11px;
+            background: var(--accent);
+            border-radius: 50%;
+            box-shadow: 0 0 10px var(--accent-glow);
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+        .bar:hover .progress-fill::after { opacity: 1; }
+
+        .controls { display: flex; align-items: center; gap: 20px; }
+
+        .play-btn {
+            width: 54px; height: 54px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent), #02ffd5);
+            display: flex; justify-content: center; align-items: center;
+            cursor: pointer;
+            border: none;
+            color: #0a0a0f;
+            font-size: 1.35rem;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 0 25px var(--accent-glow);
+            position: relative;
+        }
+        .play-btn:hover { transform: scale(1.08); box-shadow: 0 0 40px var(--accent-glow); }
+        .play-btn:active { transform: scale(0.95); }
+
+        @keyframes pulse-ring {
+            0%   { transform: scale(1); opacity: 0.5; }
+            100% { transform: scale(1.65); opacity: 0; }
+        }
+        .play-btn.playing::before {
+            content: '';
+            position: absolute;
+            width: 54px; height: 54px;
+            border-radius: 50%;
+            border: 2px solid var(--accent);
+            animation: pulse-ring 1.6s ease-out infinite;
+        }
+
+        @media (max-width: 480px) {
+            .lyrics-container { height: 280px; }
+            .player { padding: 14px 16px 22px; }
+        }
+    </style>
+</head>
+<body>
+
+<video id="bg-video" autoplay muted loop playsinline>
+    <source src="video.mp4" type="video/mp4">
+</video>
+<div class="overlay"></div>
+<div class="particles" id="particles"></div>
+
+<div class="main">
+    <div class="header">
+        <h1>Te La Dedico</h1>
+        <div class="subtitle">SEÑORITA ADRI🖤</div>
+    </div>
+
+    <div class="lyrics-container" id="lyricsContainer">
+        <div class="lyrics-scroll" id="lyricsScroll"></div>
+    </div>
+</div>
+
+<div class="player">
+    <div class="progress-container">
+        <span id="current">0:00</span>
+        <div class="bar" id="progressBar">
+            <div class="progress-fill" id="progress"></div>
+        </div>
+        <span id="duration">0:00</span>
+    </div>
+    <div class="controls">
+        <button class="play-btn" id="playBtn">▶</button>
+    </div>
+</div>
+
+<audio id="music" src="musica.mp3" preload="auto"></audio>
+
+<script>
+const music        = document.getElementById("music");
+const playBtn      = document.getElementById("playBtn");
+const progressEl   = document.getElementById("progress");
+const progressBar  = document.getElementById("progressBar");
+const currentEl    = document.getElementById("current");
+const durationEl   = document.getElementById("duration");
+const lyricsScroll = document.getElementById("lyricsScroll");
+const lyricsContainer = document.getElementById("lyricsContainer");
+
+const lyrics = [
+    { start: 7.0,   end: 12.0,  text: "Aunque  me pases bloqueando y eliminando :(" },
+    { start: 13.0,  end: 20.5,  text: "Que fatalidad, eres mi héroe y mi villana" },
+    { start: 21.0,  end: 27.8,  text: "Podría enloquecer descifrando tu conspiración" },
+    { start: 28.2,  end: 34.5,  text: "Muero por saber el desenlace de esta trama" },
+    { start: 34.8,  end: 41.5,  text: "Comienza a anochecer y el corazón va al descubierto" },
+    { start: 41.8,  end: 48.0,  text: "Debo interpretar tus gritos, tus llamadas, tus caricias" },
+    { start: 48.2,  end: 54.5,  text: "Entrecortadas y tus arranques de pasión" },
+    { start: 55.0,  end: 60.5,  text: "Debo buscar dentro de tanto desperfecto" },
+    { start: 61.0,  end: 68.5,  text: "La moraleja de este cuento, debo domar tu corazón" },
+    { start: 69.0,  end: 76.5,  text: "En la oscuridad, son los instintos los que mandan" },
+    { start: 77.0,  end: 83.5,  text: "Qué más quieres romper, de corazones tienes colección" },
+    { start: 83.8,  end: 90.5,  text: "Ya va a amanecer y sigo en esta encrucijada" },
+    { start: 91.0,  end: 97.5,  text: "Misterio de mujer, solo será cuestión de tiempo" },
+    { start: 97.8,  end: 103.8, text: "Debo interpretar tus gritos, tus llamadas, tus caricias" },
+    { start: 104.0, end: 111.0, text: "Entrecortadas y tus arranques de pasión" },
+    { start: 111.5, end: 116.8, text: "Debo buscar dentro de tanto desperfecto" },
+    { start: 117.0, end: 125.0, text: "La moraleja de este cuento, debo domar tu corazón" },
+    { start: 154.0, end: 160.5, text: "Y debo de enterrar el filo de tu espada en los secretos" },
+    { start: 160.8, end: 167.5, text: "De tu almohada hasta que entiendas la lección" },
+    { start: 167.8, end: 173.0, text: "Debo llegar al fondo de este desparpajo" },
+    { start: 173.2, end: 181.0, text: "Que yo de esta no me rajo hasta domar tu corazón" },
+    { start: 181.5, end: 195.0, text: "A&A💜" },
+];
+
+const lineEls = lyrics.map((l) => {
+    const div = document.createElement("div");
+    div.className = "lyric-line upcoming";
+    l.text.split(/\s+/).forEach((w) => {
+        const sp = document.createElement("span");
+        sp.className = "word";
+        sp.textContent = w + " ";
+        div.appendChild(sp);
+    });
+    lyricsScroll.appendChild(div);
+    return div;
+});
+
+function fmt(t) {
+    if (isNaN(t) || t < 0) return "0:00";
+    return Math.floor(t / 60) + ":" + String(Math.floor(t % 60)).padStart(2, "0");
+}
+
+let lastActiveIdx = -1;
+let animationFrameId = null;
+
+function updateLyrics() {
+    const t = music.currentTime;
+
+    currentEl.textContent = fmt(t);
+    const duration = music.duration || 1;
+    progressEl.style.width = ((t / duration) * 100) + "%";
+
+    let activeIdx = -1;
+    for (let i = 0; i < lyrics.length; i++) {
+        if (t >= lyrics[i].start && t < lyrics[i].end) { activeIdx = i; break; }
+    }
+
+    if (activeIdx !== lastActiveIdx) {
+        lineEls.forEach((el, i) => {
+            el.classList.remove("past", "active", "upcoming");
+            if      (i < activeIdx)  el.classList.add("past");
+            else if (i === activeIdx) el.classList.add("active");
+            else                      el.classList.add("upcoming");
+        });
+
+        if (activeIdx >= 0) {
+            const containerH = lyricsContainer.offsetHeight;
+            const activeEl   = lineEls[activeIdx];
+            const lineCenter = activeEl.offsetTop + activeEl.offsetHeight / 2;
+            const shift      = lineCenter - containerH / 2;
+            lyricsScroll.style.transform = `translateY(${-shift}px)`;
+        } else if (t < lyrics[0].start) {
+            lyricsScroll.style.transform = "translateY(0)";
+        }
+
+        lastActiveIdx = activeIdx;
+    }
+
+    if (activeIdx >= 0) {
+        const line    = lyrics[activeIdx];
+        const wordEls = lineEls[activeIdx].querySelectorAll(".word");
+        const total   = wordEls.length;
+        
+        const ratio   = (t - line.start) / (line.end - line.start);
+        const revealed = Math.floor(ratio * total);
+
+        wordEls.forEach((w, wi) => {
+            w.classList.remove("lit", "current-word");
+            if (wi < revealed) {
+                w.classList.add("lit");
+            } else if (wi === revealed) {
+                w.classList.add("current-word");
+            }
+        });
+    }
+
+    if (!music.paused) {
+        animationFrameId = requestAnimationFrame(updateLyrics);
+    }
+}
+
+function startAnimationLoop() {
+    if (!animationFrameId) {
+        animationFrameId = requestAnimationFrame(updateLyrics);
+    }
+}
+
+function cancelAnimationLoop() {
+    if (animationFrameId) {
+        cancelAnimationFrame(animationFrameId);
+        animationFrameId = null;
+    }
+}
+
+music.addEventListener("play", startAnimationLoop);
+music.addEventListener("pause", cancelAnimationLoop);
+
+music.addEventListener("loadedmetadata", () => {
+    durationEl.textContent = fmt(music.duration);
+});
+
+
+if (music.readyState >= 1) {
+    durationEl.textContent = fmt(music.duration);
+}
+
+progressBar.addEventListener("click", (e) => {
+    const r = progressBar.getBoundingClientRect();
+    const duration = music.duration || 0;
+    if (duration > 0) {
+        music.currentTime = ((e.clientX - r.left) / r.width) * duration;
+        if (music.paused) {
+            updateLyrics(); 
+        }
+    }
+});
+
+playBtn.addEventListener("click", () => {
+    if (music.paused) {
+        music.play().catch(() => alert("Asegúrate de que 'musica.mp3' esté en la misma carpeta que este archivo."));
+        playBtn.textContent = "⏸";
+        playBtn.classList.add("playing");
+    } else {
+        music.pause();
+        playBtn.textContent = "▶";
+        playBtn.classList.remove("playing");
+    }
+});
+
+music.addEventListener("ended", () => {
+    playBtn.textContent = "▶";
+    playBtn.classList.remove("playing");
+    progressEl.style.width = "0%";
+    lastActiveIdx = -1;
+    cancelAnimationLoop();
+    lyricsScroll.style.transform = "translateY(0)";
+    lineEls.forEach(el => {
+        el.classList.remove("past", "active");
+        el.classList.add("upcoming");
+        el.querySelectorAll(".word").forEach(w => w.classList.remove("lit", "current-word"));
+    });
+});
+
+(function createParticles() {
+    const container = document.getElementById("particles");
+    for (let i = 0; i < 40; i++) {
+        const p = document.createElement("div");
+        p.className = "particle";
+        p.style.height   = (Math.random() * 80 + 30) + "px";
+        p.style.left     = Math.random() * 100 + "%";
+        p.style.animationDuration = (Math.random() * 3 + 2) + "s";
+        p.style.animationDelay   = (Math.random() * 5) + "s";
+        container.appendChild(p);
+    }
+})();
+</script>
+</body>
+</html>
